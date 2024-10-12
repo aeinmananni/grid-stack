@@ -1,31 +1,32 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import ReactGridLayout from "react-grid-layout";
 
 const GridLayout = () => {
-  const [containerWidth, setContainerWidth] = useState(1400);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const updateWidth = () => {
-    if (containerRef.current) {
-      setContainerWidth(containerRef.current.offsetWidth);
-    }
-  };
-
-  useEffect(() => {
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
-  }, []);
-
-  const layout = [
+  const defaultLayout = [
     { i: "1", x: 0, y: 0, w: 2, h: 2 },
     { i: "2", x: 2, y: 0, w: 2, h: 2 },
     { i: "3", x: 4, y: 0, w: 2, h: 2 },
     { i: "4", x: 0, y: 2, w: 2, h: 2 },
     { i: "5", x: 2, y: 2, w: 2, h: 2 },
   ];
+
+  const [layout, setLayout] = useState(() => {
+    const savedLayout = localStorage.getItem("grid-layout");
+    return savedLayout ? JSON.parse(savedLayout) : defaultLayout;
+  });
+
+  const saveLayoutToLocalStorage = (newLayout: any) => {
+    localStorage.setItem("grid-layout", JSON.stringify(newLayout));
+  };
+
+  const onLayoutChange = (newLayout: any) => {
+    setLayout(newLayout);
+    saveLayoutToLocalStorage(newLayout);
+  };
 
   return (
     <div className="flex h-screen">
@@ -42,7 +43,8 @@ const GridLayout = () => {
           layout={layout}
           cols={12}
           rowHeight={100}
-          width={containerWidth}
+          width={820}
+          onLayoutChange={onLayoutChange}
         >
           <div
             key="1"
@@ -76,6 +78,7 @@ const GridLayout = () => {
           </div>
         </ReactGridLayout>
       </div>
+
       <div className="w-64 bg-yellow-400 flex items-center justify-center">
         <span>Right Sidebar</span>
       </div>
